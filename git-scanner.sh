@@ -22,7 +22,7 @@ CMD
 )
 
 # Run find
-find . \( -path "./.*/*" -prune -o -path "./Library/*" -prune \) -o -name ".git" -exec sh -c "$processor" {} \;
+find . -path "./.*/*" -prune -o -path "./Library/*" -prune -o -name ".git" -exec sh -c "$processor" {} \;
 
 # Switch back to working directory
-cd "$pwd" > /dev/null
+cd - > /dev/null
