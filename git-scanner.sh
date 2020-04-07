@@ -1,5 +1,9 @@
 #!/bin/bash
 
+source ./mnopts/mnopts.sh "ignore-i" "" "$@"
+
+[[ "$opt_i" = "true" ]] && echo "Ignoring repositories with no remote specified (-i option)"
+
 # Get the working directory as for storing the list
 pwd=$(pwd)
 
@@ -9,16 +13,18 @@ cd ~
 # Construct the command for processing and adding each repo to the list:
 # Print the repo name, check for existence of remotes then print the URI if it exits
 processor=$(cat <<- CMD
-    echo "\033[94m\${0:2:\${#0}-7}\033[0m"
     output=\$(git --git-dir="\${0:2:\${#0}-7}/.git" remote)
     if ((\${#output} > 0))
     then
+        echo "\033[94m\${0:2:\${#0}-7}\033[0m"
         for remote in \$output
         do
             printf "    \$remote: "
             git --git-dir="\${0:2:\${#0}-7}/.git" remote get-url \$remote
         done
-    else
+    elif [ "$opt_i" != "true" ]
+    then
+        echo "\033[94m\${0:2:\${#0}-7}\033[0m"
         echo "    \033[90mNo remotes\033[0m"
     fi
 CMD
