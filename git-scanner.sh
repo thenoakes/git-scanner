@@ -11,12 +11,15 @@ cd ~
 processor=$(cat <<- CMD
     echo "\033[94m\${0:2:\${#0}-7}\033[0m"
     output=\$(git --git-dir="\${0:2:\${#0}-7}/.git" remote)
-    printf "    "
     if ((\${#output} > 0))
     then
-        git --git-dir="\${0:2:\${#0}-7}/.git" remote get-url \$output
+        for remote in \$output
+        do
+            printf "    \$remote: "
+            git --git-dir="\${0:2:\${#0}-7}/.git" remote get-url \$remote
+        done
     else
-        echo "\033[90mNo remotes\033[0m"
+        echo "    \033[90mNo remotes\033[0m"
     fi
 CMD
 )
