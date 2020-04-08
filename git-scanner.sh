@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source ./mnopts/mnopts.sh "ignore-i" "" "$@"
+source ./mnopts/mnopts.sh "ignore:i" "" "$@"
 
 [[ "$opt_i" = "true" ]] && echo "Ignoring repositories with no remote specified (-i option)"
 
