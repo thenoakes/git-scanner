@@ -10,17 +10,19 @@ import (
 
 func main() {
 	blueColour := "\033[94m"
+	greyColour := "\033[90m"
 	defaultColour := "\033[0m"
 
 	homeDir, _ := os.UserHomeDir()
-
-	// repos := []string{}
 
 	// Walk all filepaths from the user's home directory...
 	err := filepath.Walk(homeDir,
 		func(path string, info os.FileInfo, err error) error {
 			if err != nil {
-				return err
+				//return err
+				// TODO: Basically we're skipping because we don't want to deal with 'access denied'
+				// but maybe we can do better
+				return filepath.SkipDir
 			}
 
 			// Skip hidden directories which are direct descendents
@@ -32,11 +34,9 @@ func main() {
 			if info.IsDir() && info.Name() == ".git" {
 				// Get a path relative to ~
 				shortPath := strings.Replace(path, homeDir, "~", 1)
-				
-				// repos = append(repos, shortPath)
 
 				// Strip the ~ prefix and .git suffix and print to console
-				repoName := shortPath[2:len(shortPath)-5]
+				repoName := shortPath[2 : len(shortPath)-5]
 				fmt.Print(blueColour, repoName, defaultColour, "\n")
 
 				// Get the git remotes by name if there are any
@@ -44,21 +44,25 @@ func main() {
 				result, _ := gitCmd.Output()
 
 				// Parse the results
-				remotes := strings.Split(strings.TrimSpace(string(result)), "\n")
+				remoteOutput := strings.Split(strings.TrimSpace(string(result)), "\n")
+
+				// Filter out empty lines
+				remotes := []string{}
+				for _, line := range remoteOutput {
+					if len(line) > 0 {
+						remotes = append(remotes, line)
+					}
+				}
 
 				// Obtain URLs and print alongside remote names
 				if len(remotes) > 0 {
 					for _, remote := range remotes {
-						if len(remote) == 0 {
-							continue
-						}
 						remoteCmd := exec.Command("git", "--git-dir="+path, "remote", "get-url", remote)
 						remoteUrl, _ := remoteCmd.Output()
-
-						fmt.Printf("%s: %s\n", remote, strings.TrimSpace(string(remoteUrl)))
+						fmt.Printf("    %s: %s\n", remote, strings.TrimSpace(string(remoteUrl)))
 					}
 				} else {
-					fmt.Println("No remotes")
+					fmt.Print(greyColour, "    No remotes", defaultColour, "\n")
 				}
 
 				// Once we've found a .git directory, save time by not delving any further
@@ -75,4 +79,3 @@ func main() {
 	//fmt.Printf("%d", len(repos))
 
 }
-
