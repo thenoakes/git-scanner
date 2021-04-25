@@ -45,9 +45,13 @@ CMD
 )
 
 # Run find from the current direcrory 
-#      (but skip subdirectories of hidden directories and Library - this just avoids undesired output from these directories)
-#                                                                          Run the script - {} is replaced by the path
-find . -path "./.*/*" -prune -o -path "./Library/*" -prune -o -name ".git" -exec sh -c "$processor" {} \;
+#   (but skip subdirectories of hidden directories and Library - this just avoids undesired output from these directories)
+#                Run the script - {} is replaced by the path
+find -s . \
+    -path "./.Trash" -prune -o \
+    -path "./Pictures/*" -prune -o \
+    -path "./.*/*" -prune -o -path "./Library/*" -prune -o \
+    -name ".git" -exec sh -c "$processor" {} \;
 
 # Switch back to working directory
 cd - > /dev/null
