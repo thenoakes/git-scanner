@@ -8,12 +8,13 @@ import (
 	"strings"
 )
 
+const (
+	blueColour    = "\033[94m"
+	greyColour    = "\033[90m"
+	defaultColour = "\033[0m"
+)
+
 func main() {
-	const (
-		blueColour    = "\033[94m"
-		greyColour    = "\033[90m"
-		defaultColour = "\033[0m"
-	)
 
 	homeDir, err := os.UserHomeDir()
 
@@ -64,15 +65,7 @@ func main() {
 				remotes := cleanseLines(remoteOutput)
 
 				// Obtain URLs and print alongside remote names
-				if len(remotes) > 0 {
-					for _, remote := range remotes {
-						remoteCmd := exec.Command("git", "--git-dir="+path, "remote", "get-url", remote)
-						remoteUrl, _ := remoteCmd.Output()
-						fmt.Printf("    %s: %s\n", remote, cleanse(remoteUrl))
-					}
-				} else {
-					fmt.Print(greyColour, "    No remotes", defaultColour, "\n")
-				}
+				printRemoteUrls(path, remotes)
 
 				// Once we've found a .git directory, save time by not delving any further
 				return filepath.SkipDir
@@ -85,6 +78,18 @@ func main() {
 		os.Exit(0)
 	}
 
+}
+
+func printRemoteUrls(path string, remoteNames []string) {
+	if len(remoteNames) == 0 {
+		fmt.Print(greyColour, "    No remotes", defaultColour, "\n")
+	} else {
+		for _, remoteName := range remoteNames {
+			remoteCmd := exec.Command("git", "--git-dir="+path, "remote", "get-url", remoteName)
+			remoteUrl, _ := remoteCmd.Output()
+			fmt.Printf("    %s: %s\n", remoteName, cleanse(remoteUrl))
+		}
+	}
 }
 
 func cleanse(output []byte) string {
