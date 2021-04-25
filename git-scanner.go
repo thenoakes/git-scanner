@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"os/exec"
@@ -16,30 +17,49 @@ const (
 	defaultColour = "\033[0m"
 )
 
+// opts encapsulates command-line options for git-scanner
+type opts struct {
+	IgnoreNone bool `short:"i" long:"ignore-none" description:"Ignore repositories with no remote specified"`
+}
 
-func main() {
-	
-	// Standard library `flag` package
-	// var optI_Long = flag.Bool("ignore-none", false, "Ignore repositories with no remote specified")
-	// var optI_Short = flag.Bool("i", false, "")
-	// flag.Parse()
-	// optI := *optI_Short || *optI_Long
-	
-	// Third party `go-flags` package
-	var options struct {
-		IgnoreNone bool `short:"i" long:"ignore-none" description:"Ignore repositories with no remote specified"`
+// parseOptsStd parses command-line options using the flag library
+func parseOptsStd() *opts {
+	var optI_Long = flag.Bool("ignore-none", false, "Ignore repositories with no remote specified")
+	var optI_Short = flag.Bool("i", false, "")
+	flag.Parse()
+	return &opts{
+		IgnoreNone: *optI_Short || *optI_Long,
 	}
+}
 
-	parser := flags.NewParser(&options, flags.Default)
+// parseOptsThirdParty parses command-line options using third-party library go-flags
+func parseOptsThirdParty() *opts {
+	var opts = &opts{}
+	parser := flags.NewParser(opts, flags.Default)
 	_, err := parser.Parse()
 
 	if err != nil {	
 		if !flags.WroteHelp(err) {
 			parser.WriteHelp(os.Stdout)
 		}
-		return
+		return nil
 	}
-	optI := options.IgnoreNone
+	return opts
+}
+
+func main() {
+	const useNew = false
+
+	var optI = false
+	if useNew {
+		opts := parseOptsThirdParty()
+		if opts == nil {
+			return
+		}
+		optI = opts.IgnoreNone
+	} else {
+		optI = parseOptsStd().IgnoreNone
+	}
 
 	homeDir, err := os.UserHomeDir()
 
