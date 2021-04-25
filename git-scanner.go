@@ -6,6 +6,8 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+
+	"github.com/jessevdk/go-flags"
 )
 
 const (
@@ -14,7 +16,30 @@ const (
 	defaultColour = "\033[0m"
 )
 
+
 func main() {
+	
+	// Standard library `flag` package
+	// var optI_Long = flag.Bool("ignore-none", false, "Ignore repositories with no remote specified")
+	// var optI_Short = flag.Bool("i", false, "")
+	// flag.Parse()
+	// optI := *optI_Short || *optI_Long
+	
+	// Third party `go-flags` package
+	var options struct {
+		IgnoreNone bool `short:"i" long:"ignore-none" description:"Ignore repositories with no remote specified"`
+	}
+
+	parser := flags.NewParser(&options, flags.Default)
+	_, err := parser.Parse()
+
+	if err != nil {	
+		if !flags.WroteHelp(err) {
+			parser.WriteHelp(os.Stdout)
+		}
+		return
+	}
+	optI := options.IgnoreNone
 
 	homeDir, err := os.UserHomeDir()
 
@@ -50,22 +75,24 @@ func main() {
 			}
 
 			// Log all .git directories
-			if info.IsDir() && info.Name() == ".git" {
-				// Print the path relative to ~
-				fmt.Print(blueColour, getRepoName(path), defaultColour, "\n")
-
+			if info.IsDir() && info.Name() == ".git" {	
 				// Get the git remotes by name if there are any
 				gitCmd := exec.Command("git", "--git-dir="+path, "remote")
 				result, _ := gitCmd.Output()
-
+				
 				// Parse the results
 				remoteOutput := strings.Split(cleanse(result), "\n")
-
+				
 				// Filter out empty lines
 				remotes := cleanseLines(remoteOutput)
 
-				// Obtain URLs and print alongside remote names
-				printRemoteUrls(path, remotes)
+				if len(remotes) > 0 || !optI {
+					// Print the path relative to ~
+					fmt.Print(blueColour, getRepoName(path), defaultColour, "\n")
+	
+					// Obtain URLs and print alongside remote names
+					printRemoteUrls(path, remotes)
+				}
 
 				// Once we've found a .git directory, save time by not delving any further
 				return filepath.SkipDir
