@@ -64,7 +64,7 @@ func main() {
 	homeDir, err := os.UserHomeDir()
 
 	// isHiddenRoot returns true for a hidden directory which is a direct descendent of ~
-	isHiddenRoot := func(path string, info os.FileInfo) bool {
+	isHiddenRoot := func(path string, info os.DirEntry) bool {
 		return path == filepath.Join(homeDir, info.Name()) && strings.HasPrefix(info.Name(), ".")
 	}
 
@@ -80,8 +80,8 @@ func main() {
 	}
 
 	// Walk all filepaths from the user's home directory...
-	err = filepath.Walk(homeDir,
-		func(path string, info os.FileInfo, err error) error {
+	err = filepath.WalkDir(homeDir,
+		func(path string, info os.DirEntry, err error) error {
 			if err != nil {
 				//return err
 				// TODO: Basically we're skipping because we don't want to deal with 'access denied'
