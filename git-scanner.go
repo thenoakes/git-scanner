@@ -24,8 +24,8 @@ type opts struct {
 // parseOptsThirdParty parses command-line options using third-party library go-flags
 func parseOptsThirdParty() *opts {
 	var opts = &opts{}
-	parser := flags.NewParser(opts, flags.Default)
-	_, err := parser.Parse()
+	var parser = flags.NewParser(opts, flags.Default)
+	var _, err = parser.Parse()
 
 	if err != nil {	
 		if !flags.WroteHelp(err) {
@@ -37,13 +37,18 @@ func parseOptsThirdParty() *opts {
 }
 
 func main() {
-	opts := parseOptsThirdParty()
+	var opts = parseOptsThirdParty()
 	if opts == nil {
 		return
 	}
-	optI := opts.IgnoreNone
+	var optI = opts.IgnoreNone
 	
-	homeDir, err := os.UserHomeDir()
+	var homeDir, err = os.UserHomeDir()
+
+	if err != nil {
+		fmt.Println("Fatal error: unable to determine home directory")
+		os.Exit(1)
+	}
 
 	// isHiddenRoot returns true for a hidden directory which is a direct descendent of ~
 	isHiddenRoot := func(path string, info os.DirEntry) bool {
@@ -54,11 +59,6 @@ func main() {
 		shortPath := strings.Replace(path, homeDir, "~", 1)
 		// Strip the ~ prefix and .git suffix and print to console
 		return shortPath[2 : len(shortPath)-5]
-	}
-
-	if err != nil {
-		fmt.Println("Fatal error: unable to determine home directory")
-		os.Exit(1)
 	}
 
 	// Walk all filepaths from the user's home directory...
