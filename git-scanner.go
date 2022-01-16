@@ -122,11 +122,9 @@ func printRemoteUrls(path string, remoteNames []string) {
 	}
 	diffCmd := exec.Command("git", "--git-dir="+path, "--work-tree="+path[0 : len(path)-5], "diff", "--exit-code", "--quiet")
 	if err := diffCmd.Run(); err != nil {
-		// fmt.Printf("%s", err.Error())
 		if _, ok := err.(*exec.ExitError); ok {
-			fmt.Print(redColour, "There are uncommitted changes", defaultColour, "\n")
-			// fmt.Printf("EXIT CODE: %d\n", errorCode.ExitCode())
-	}
+			fmt.Print(redColour, "    There are uncommitted changes", defaultColour, "\n")
+		}
 	}
 }
 
