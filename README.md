@@ -1,6 +1,13 @@
-A simple shell script which scans a user's home directory for git repositories
+A simple go program which scans a user's home directory for git repositories
 and prints out the remote URL for it if there is one.
 
-Originally written in shell script (run `./git-scanner.sh`);
+# Create binary
 
-partially rewritten in golang (`go build git-scanner.go` to create binary, then `./git-scanner`).
+```shell
+go build git-scanner.go
+```
+
+# Run
+```shell
+./git-scanner --help
+```
